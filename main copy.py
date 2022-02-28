@@ -17,9 +17,10 @@ import smtplib
 
 HOSTNAME = "data.shoppertrak.com"
 USERNAME = "altaplaza"
-PASSWORD = os.environ.get("FTP_CREDENTIALS_SHOPPERTRAK")
+PASSWORD = "mZZyG9NFWLu*JG"
 
 NAMES_DAYS = ['Lunes','Martes','Miercoles','Jueves', 'Viernes', 'Sabado','Domingo']
+
 
 class My_Connection(pysftp.Connection):
     def __init__(self, *args, **kwargs):
@@ -44,13 +45,13 @@ with My_Connection(host=HOSTNAME, username=USERNAME, password=PASSWORD, cnopts=c
 
 def read_one_file(day):
     traffic = 0
-    with open(f'./files/Extract_{day.strftime("%Y%m%d")}.csv', 'r') as datafile:
+    with open(f'./files/Extract_{day}.csv', 'r') as datafile:
             csv_file = csv.reader(datafile)
-            today = (day - timedelta(days=(1))).strftime("%Y-%m-%d")
+
             for row in csv_file:
+                #print(row[5])
                 id,place,door,date,hour,traffic_count,traffic_es,letter = row
-                if (today == date and hour != "00:00:00") or (day.strftime("%Y-%m-%d") == date and hour == "00:00:00"):
-                    traffic += int(traffic_count)
+                traffic += int(traffic_count)
 
     return traffic
 
@@ -78,8 +79,7 @@ def send_email(message):
     email["Subject"] = subject
     email.attach(MIMEText(body, "plain"))
     image = MIMEImage(open('trafico-semanal.png', 'rb').read())
-    #image.add_header('Content-ID', '<image1>')
-    image.add_header('content-disposition', 'attachment',filename='%s' % 'trafico-semanal.png' )
+    image.add_header('Content-ID', '<image1>')
     email.attach(image)
     report = MIMEBase("application", "octate-stream")
     session = smtplib.SMTP('smtp-relay.gmail.com', 587) #use gmail with port
@@ -97,18 +97,34 @@ trafico_semana_anterior = []
 weekday = (datetime.now() - timedelta(days=(1))).weekday()
 for i in range(7):
     if i - weekday <= 0:
-        day = (datetime.now() - timedelta(days=(weekday - i)))
-        previous_day = (datetime.now() - timedelta(days=(weekday - i + 7)))
+        day = (datetime.now() - timedelta(days=(weekday - i))).strftime("%Y%m%d")
+        previous_day = (datetime.now() - timedelta(days=(weekday - i + 7))).strftime("%Y%m%d")
         trafico.append(read_one_file(day))
         trafico_semana_anterior.append(read_one_file(previous_day))
         if i - weekday == 0:
             trafico_ayer = read_one_file(day)
     elif i - weekday > 0:
-        previous_day = (datetime.now() - timedelta(days=(7 - i + weekday)))
+        previous_day = (datetime.now() - timedelta(days=(7 - i + weekday))).strftime("%Y%m%d")
         trafico.append(0)
         trafico_semana_anterior.append(read_one_file(previous_day))
 
 
+'''
+
+fig, ax = plt.subplots()
+ax.set_title('Tráfico Semanal')
+#Colocamos una etiqueta en el eje Y
+ax.set_ylabel('Tráfico')
+#Colocamos una etiqueta en el eje X
+ax.set_xlabel('Día')
+#Creamos la grafica de barras utilizando 'dias' como eje X y 'trafico' como eje y.
+bar = plt.bar(NAMES_DAYS, trafico)
+autolabel(bar)
+plt.savefig('trafico-semanal.png')
+#Finalmente mostramos la grafica con el metodo show()
+#plt.show()
+
+'''
 
 print(trafico)
 print(trafico_semana_anterior)
@@ -122,9 +138,9 @@ width = 0.35
 fig, ax = plt.subplots()
 
 #Generamos las barras para el conjunto de hombres
-rects1 = ax.bar(x - width/2, trafico_semana_anterior, width, label='Semana anterior')
+rects1 = ax.bar(x - width/2, trafico_semana_anterior, width, label='Anterior')
 #Generamos las barras para el conjunto de mujeres
-rects2 = ax.bar(x + width/2, trafico, width, label='Semana actual')
+rects2 = ax.bar(x + width/2, trafico, width, label='Actual')
 
 #Añadimos las etiquetas de identificacion de valores en el grafico
 ax.set_ylabel('Trafico')
