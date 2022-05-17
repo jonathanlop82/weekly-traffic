@@ -24,8 +24,8 @@ import mimetypes
 
 HOSTNAME = "data.shoppertrak.com"
 USERNAME = "altaplaza"
-PASSWORD = "mZZyG9NFWLu*JG"
-#PASSWORD = os.environ.get("FTP_CREDENTIALS_SHOPPERTRAK")
+
+PASSWORD = os.environ.get("FTP_CREDENTIALS_SHOPPERTRAK")
 
 
 NAMES_DAYS = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"]
