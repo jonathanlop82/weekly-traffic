@@ -1,3 +1,4 @@
+
 import pysftp
 import os
 import csv
@@ -67,6 +68,21 @@ def read_one_file(day):
                 traffic += int(traffic_count)
 
     return traffic
+
+def read_traffic_past_year(week_number):
+    traffic_week = []
+    with open('report-site-2021.csv', 'r') as week_data:
+        csv_week = csv.reader(week_data)
+        for row in csv_week:
+            org, site, date_, down, week_num, fmonth, fyear, traffic, currency, comp = row
+            if week_num != "fiscal week #":
+                if int(week_num) == week_number:
+                    #print(row)
+                    traffic_week.append(int(traffic))
+    traffic_week.append(traffic_week[0])
+    traffic_week.pop(0)
+    
+    return traffic_week
 
 
 def autolabel(rects):
@@ -170,9 +186,9 @@ def send_html_mail(message, email_to):
 
 trafico = []
 trafico_semana_anterior = []
-trafico_anno_anterior = []
 week_number = datetime.date(datetime.today()).isocalendar()[1]
-print(f'Week: {week_number}')
+trafico_anno_anterior = read_traffic_past_year(week_number)
+#print(f'Week: {week_number}')
 ## retornar dias de la semana
 weekday = (datetime.now() - timedelta(days=(1))).weekday()
 for i in range(7):
@@ -191,20 +207,23 @@ for i in range(7):
 
 print(trafico)
 print(trafico_semana_anterior)
+print(trafico_anno_anterior)
 
 
 ###### GENERANDO GRAFICA DE BARRAS DE TRAFICO ACTUAL VS SEMANA ANTERIOR #################
 # Obtenemos la posicion de cada etiqueta en el eje de X
 x = np.arange(len(NAMES_DAYS))
 # tamaño de cada barra
-width = 0.35
-
+width = 0.25
 fig, ax = plt.subplots()
 
-# Generamos las barras para el conjunto de hombres
-rects1 = ax.bar(x - width / 2, trafico_semana_anterior, width, label="Semana anterior")
-# Generamos las barras para el conjunto de mujeres
-rects2 = ax.bar(x + width / 2, trafico, width, label="Semana actual")
+rects1 = ax.bar(x - width , trafico_anno_anterior, width, label="Año anterior")
+# Generamos las barras para el conjunto de semana anterior
+rects2 = ax.bar(x , trafico_semana_anterior, width, label="Semana anterior")
+# Generamos las barras para el conjunto de semana actual
+rects3 = ax.bar(x + width, trafico, width, label="Semana actual")
+
+
 
 # Añadimos las etiquetas de identificacion de valores en el grafico
 ax.set_ylabel("Tráfico")
@@ -214,16 +233,21 @@ ax.set_xticklabels(NAMES_DAYS)
 # Añadimos un legen() esto permite mmostrar con colores a que pertence cada valor.
 ax.legend()
 
-autolabel(rects1)
-autolabel(rects2)
+#autolabel(rects1)
+#autolabel(rects2)
+#autolabel(rects3)
+ax.bar_label(rects1, padding= 3)
+ax.bar_label(rects2, padding= -15)
+ax.bar_label(rects3, padding= 3)
 fig.tight_layout()
+fig.set_size_inches(8, 6)
 plt.savefig("trafico-semanal.png")
 # Mostramos la grafica con el metodo show()
 # plt.show()
 
 if trafico_ayer != 0:
     message = f"El tráfico de ayer fue de: {trafico_ayer} visitantes."
-    #send_html_mail(message, "soporte@altaplazamall.com")
+    send_html_mail(message, "trafico@altaplazamall.com")
 else:
     message = "Tráfico es 0, revisar"
-    #send_html_mail(message, "soporte@altaplazamall.com")
+    send_html_mail(message, "soporte@altaplazamall.com")
