@@ -23,7 +23,8 @@ import mimetypes
 
 HOSTNAME = "data.shoppertrak.com"
 USERNAME = "altaplaza"
-PASSWORD = os.environ.get("FTP_CREDENTIALS_SHOPPERTRAK")
+PASSWORD = "mZZyG9NFWLu*JG"
+#PASSWORD = os.environ.get("FTP_CREDENTIALS_SHOPPERTRAK")
 
 
 NAMES_DAYS = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"]
@@ -169,6 +170,9 @@ def send_html_mail(message, email_to):
 
 trafico = []
 trafico_semana_anterior = []
+trafico_anno_anterior = []
+week_number = datetime.date(datetime.today()).isocalendar()[1]
+print(f'Week: {week_number}')
 ## retornar dias de la semana
 weekday = (datetime.now() - timedelta(days=(1))).weekday()
 for i in range(7):
@@ -219,7 +223,7 @@ plt.savefig("trafico-semanal.png")
 
 if trafico_ayer != 0:
     message = f"El tráfico de ayer fue de: {trafico_ayer} visitantes."
-    send_html_mail(message, "trafico@altaplazamall.com")
+    #send_html_mail(message, "soporte@altaplazamall.com")
 else:
     message = "Tráfico es 0, revisar"
-    send_html_mail(message, "soporte@altaplazamall.com")
+    #send_html_mail(message, "soporte@altaplazamall.com")
